@@ -155,7 +155,7 @@ byte NetworkSpectatorCount()
  */
 std::string NetworkChangeCompanyPassword(CompanyID company_id, std::string password)
 {
-	if (password.compare("*") == 0) password = "";
+	if (password == "*") password.clear();
 
 	if (_network_server) {
 		NetworkServerSetCompanyPassword(company_id, password, false);
@@ -298,7 +298,7 @@ StringID GetNetworkErrorMsg(NetworkErrorCode err)
 {
 	/* List of possible network errors, used by
 	 * PACKET_SERVER_ERROR and PACKET_CLIENT_ERROR */
-	static const StringID network_error_strings[] = {
+	static const std::array<StringID, NETWORK_ERROR_END> network_error_strings = {
 		STR_NETWORK_ERROR_CLIENT_GENERAL,
 		STR_NETWORK_ERROR_CLIENT_DESYNC,
 		STR_NETWORK_ERROR_CLIENT_SAVEGAME,
@@ -321,9 +321,9 @@ StringID GetNetworkErrorMsg(NetworkErrorCode err)
 		STR_NETWORK_ERROR_CLIENT_TIMEOUT_JOIN,
 		STR_NETWORK_ERROR_CLIENT_INVALID_CLIENT_NAME,
 	};
-	static_assert(lengthof(network_error_strings) == NETWORK_ERROR_END);
+	static_assert(network_error_strings.size() == NETWORK_ERROR_END);
 
-	if (err >= (ptrdiff_t)lengthof(network_error_strings)) err = NETWORK_ERROR_GENERAL;
+	if (err >= network_error_strings.size()) err = NETWORK_ERROR_GENERAL;
 
 	return network_error_strings[err];
 }
@@ -684,7 +684,7 @@ NetworkGameList *NetworkAddServer(const std::string &connection_string, bool man
 		NetworkQueryServer(connection_string);
 	}
 
-	if (manually) item->manually = true;
+	item->manually = manually;
 	if (never_expire) item->version = INT32_MAX;
 
 	return item;
@@ -702,7 +702,7 @@ void GetBindAddresses(NetworkAddressList *addresses, uint16 port)
 	}
 
 	/* No address, so bind to everything. */
-	if (addresses->size() == 0) {
+	if (addresses->empty()) {
 		addresses->emplace_back("", port);
 	}
 }
@@ -845,14 +845,14 @@ static void CheckClientAndServerName()
 {
 	static const std::string fallback_client_name = "Unnamed Client";
 	StrTrimInPlace(_settings_client.network.client_name);
-	if (_settings_client.network.client_name.empty() || _settings_client.network.client_name.compare(fallback_client_name) == 0) {
+	if (_settings_client.network.client_name.empty() || _settings_client.network.client_name == fallback_client_name) {
 		Debug(net, 1, "No \"client_name\" has been set, using \"{}\" instead. Please set this now using the \"name <new name>\" command", fallback_client_name);
 		_settings_client.network.client_name = fallback_client_name;
 	}
 
 	static const std::string fallback_server_name = "Unnamed Server";
 	StrTrimInPlace(_settings_client.network.server_name);
-	if (_settings_client.network.server_name.empty() || _settings_client.network.server_name.compare(fallback_server_name) == 0) {
+	if (_settings_client.network.server_name.empty() || _settings_client.network.server_name == fallback_server_name) {
 		Debug(net, 1, "No \"server_name\" has been set, using \"{}\" instead. Please set this now using the \"server_name <new name>\" command", fallback_server_name);
 		_settings_client.network.server_name = fallback_server_name;
 	}

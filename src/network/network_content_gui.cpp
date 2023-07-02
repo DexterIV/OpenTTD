@@ -206,16 +206,20 @@ public:
 		for (auto ctype : this->receivedTypes) {
 			switch (ctype) {
 				case CONTENT_TYPE_AI:
+					FALLTHROUGH;
 				case CONTENT_TYPE_AI_LIBRARY:
 					/* AI::Rescan calls the scanner. */
 					break;
 				case CONTENT_TYPE_GAME:
+					FALLTHROUGH;
 				case CONTENT_TYPE_GAME_LIBRARY:
 					/* Game::Rescan calls the scanner. */
 					break;
 
 				case CONTENT_TYPE_BASE_GRAPHICS:
+					FALLTHROUGH;
 				case CONTENT_TYPE_BASE_SOUNDS:
+					FALLTHROUGH;
 				case CONTENT_TYPE_BASE_MUSIC:
 					mode |= TarScanner::BASESET;
 					break;
@@ -225,6 +229,7 @@ public:
 					break;
 
 				case CONTENT_TYPE_SCENARIO:
+					FALLTHROUGH;
 				case CONTENT_TYPE_HEIGHTMAP:
 					mode |= TarScanner::SCENARIO;
 					break;
@@ -240,11 +245,13 @@ public:
 		for (auto ctype : this->receivedTypes) {
 			switch (ctype) {
 				case CONTENT_TYPE_AI:
+					FALLTHROUGH;
 				case CONTENT_TYPE_AI_LIBRARY:
 					AI::Rescan();
 					break;
 
 				case CONTENT_TYPE_GAME:
+					FALLTHROUGH;
 				case CONTENT_TYPE_GAME_LIBRARY:
 					Game::Rescan();
 					break;
@@ -269,6 +276,7 @@ public:
 					break;
 
 				case CONTENT_TYPE_SCENARIO:
+					FALLTHROUGH;
 				case CONTENT_TYPE_HEIGHTMAP:
 					ScanScenarios();
 					InvalidateWindowData(WC_SAVELOAD, 0, 0);

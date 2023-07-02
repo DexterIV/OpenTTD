@@ -1835,12 +1835,12 @@ DEF_CONSOLE_CMD(ConCompanyPassword)
 		return false;
 	}
 
-	password = NetworkChangeCompanyPassword(company_id, password);
+	password = NetworkChangeCompanyPassword(company_id, std::move(password));
 
 	if (password.empty()) {
 		IConsolePrint(CC_INFO, "Company password cleared.");
 	} else {
-		IConsolePrint(CC_INFO, "Company password changed to '{}'.", password);
+		IConsolePrint(CC_INFO, "Company password changed to '{}'.", std::move(password));
 	}
 
 	return true;

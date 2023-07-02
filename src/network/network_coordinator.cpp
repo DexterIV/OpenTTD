@@ -204,7 +204,7 @@ bool ClientNetworkCoordinatorSocketHandler::Receive_GC_REGISTER_ACK(Packet *p)
 			case CONNECTION_TYPE_STUN:     connection_type = "Behind NAT"; break;
 			case CONNECTION_TYPE_TURN:     connection_type = "Via relay"; break;
 
-			case CONNECTION_TYPE_UNKNOWN: // Never returned from Game Coordinator.
+			case CONNECTION_TYPE_UNKNOWN: FALLTHROUGH; // Never returned from Game Coordinator.
 			default: connection_type = "Unknown"; break; // Should never happen, but don't fail if it does.
 		}
 
@@ -213,7 +213,7 @@ bool ClientNetworkCoordinatorSocketHandler::Receive_GC_REGISTER_ACK(Packet *p)
 			case SERVER_GAME_TYPE_INVITE_ONLY: game_type = "Invite only"; break;
 			case SERVER_GAME_TYPE_PUBLIC: game_type = "Public"; break;
 
-			case SERVER_GAME_TYPE_LOCAL: // Impossible to register local servers.
+			case SERVER_GAME_TYPE_LOCAL: FALLTHROUGH;// Impossible to register local servers.
 			default: game_type = "Unknown"; break; // Should never happen, but don't fail if it does.
 		}
 

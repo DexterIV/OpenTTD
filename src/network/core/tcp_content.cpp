@@ -28,7 +28,9 @@ bool ContentInfo::IsSelected() const
 {
 	switch (this->state) {
 		case ContentInfo::SELECTED:
+			FALLTHROUGH;
 		case ContentInfo::AUTOSELECTED:
+			FALLTHROUGH;
 		case ContentInfo::ALREADY_HERE:
 			return true;
 
@@ -84,6 +86,7 @@ std::optional<std::string> ContentInfo::GetTextfile(TextfileType type) const
 			tmp = TryGetBaseSetFile(this, true, BaseMusic::GetAvailableSets());
 			break;
 		case CONTENT_TYPE_SCENARIO:
+			FALLTHROUGH;
 		case CONTENT_TYPE_HEIGHTMAP:
 			tmp = FindScenario(this, true);
 			break;
@@ -100,7 +103,7 @@ std::optional<std::string> ContentInfo::GetTextfile(TextfileType type) const
  */
 bool NetworkContentSocketHandler::HandlePacket(Packet *p)
 {
-	PacketContentType type = (PacketContentType)p->Recv_uint8();
+	const PacketContentType type = (PacketContentType)p->Recv_uint8();
 
 	switch (this->HasClientQuit() ? PACKET_CONTENT_END : type) {
 		case PACKET_CONTENT_CLIENT_INFO_LIST:      return this->Receive_CLIENT_INFO_LIST(p);
@@ -194,7 +197,9 @@ Subdirectory GetContentInfoSubDir(ContentType type)
 		case CONTENT_TYPE_NEWGRF:       return NEWGRF_DIR;
 
 		case CONTENT_TYPE_BASE_GRAPHICS:
+			FALLTHROUGH;
 		case CONTENT_TYPE_BASE_SOUNDS:
+			FALLTHROUGH;
 		case CONTENT_TYPE_BASE_MUSIC:
 			return BASESET_DIR;
 

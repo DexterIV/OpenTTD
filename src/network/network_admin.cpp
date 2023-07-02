@@ -43,7 +43,7 @@ static const std::chrono::seconds ADMIN_AUTHORISATION_TIMEOUT(10);
 
 
 /** Frequencies, which may be registered for a certain update type. */
-static const AdminUpdateFrequency _admin_update_type_frequencies[] = {
+static const std::array<AdminUpdateFrequency, ADMIN_UPDATE_END> _admin_update_type_frequencies = {
 	ADMIN_FREQUENCY_POLL | ADMIN_FREQUENCY_DAILY | ADMIN_FREQUENCY_WEEKLY | ADMIN_FREQUENCY_MONTHLY | ADMIN_FREQUENCY_QUARTERLY | ADMIN_FREQUENCY_ANUALLY, ///< ADMIN_UPDATE_DATE
 	ADMIN_FREQUENCY_POLL | ADMIN_FREQUENCY_AUTOMATIC,                                                                                                      ///< ADMIN_UPDATE_CLIENT_INFO
 	ADMIN_FREQUENCY_POLL | ADMIN_FREQUENCY_AUTOMATIC,                                                                                                      ///< ADMIN_UPDATE_COMPANY_INFO
@@ -56,7 +56,7 @@ static const AdminUpdateFrequency _admin_update_type_frequencies[] = {
 	                       ADMIN_FREQUENCY_AUTOMATIC,                                                                                                      ///< ADMIN_UPDATE_GAMESCRIPT
 };
 /** Sanity check. */
-static_assert(lengthof(_admin_update_type_frequencies) == ADMIN_UPDATE_END);
+static_assert(_admin_update_type_frequencies.size() == ADMIN_UPDATE_END);
 
 /**
  * Create a new socket for the server side of the admin network.
@@ -139,7 +139,7 @@ NetworkRecvStatus ServerNetworkAdminSocketHandler::SendError(NetworkErrorCode er
 	p->Send_uint8(error);
 	this->SendPacket(p);
 
-	std::string error_message = GetString(GetNetworkErrorMsg(error));
+	const std::string error_message = GetString(GetNetworkErrorMsg(error));
 
 	Debug(net, 1, "[admin] The admin '{}' ({}) made an error and has been disconnected: '{}'", this->admin_name, this->admin_version, error_message);
 
@@ -496,7 +496,7 @@ NetworkRecvStatus ServerNetworkAdminSocketHandler::Receive_ADMIN_RCON(Packet *p)
 {
 	if (this->status == ADMIN_STATUS_INACTIVE) return this->SendError(NETWORK_ERROR_NOT_EXPECTED);
 
-	std::string command = p->Recv_string(NETWORK_RCONCOMMAND_LENGTH);
+	const std::string command = p->Recv_string(NETWORK_RCONCOMMAND_LENGTH);
 
 	Debug(net, 3, "[admin] Rcon command from '{}' ({}): {}", this->admin_name, this->admin_version, command);
 
@@ -510,7 +510,7 @@ NetworkRecvStatus ServerNetworkAdminSocketHandler::Receive_ADMIN_GAMESCRIPT(Pack
 {
 	if (this->status == ADMIN_STATUS_INACTIVE) return this->SendError(NETWORK_ERROR_NOT_EXPECTED);
 
-	std::string json = p->Recv_string(NETWORK_GAMESCRIPT_JSON_LENGTH);
+	const std::string json = p->Recv_string(NETWORK_GAMESCRIPT_JSON_LENGTH);
 
 	Debug(net, 6, "[admin] GameScript JSON from '{}' ({}): {}", this->admin_name, this->admin_version, json);
 
@@ -522,7 +522,7 @@ NetworkRecvStatus ServerNetworkAdminSocketHandler::Receive_ADMIN_PING(Packet *p)
 {
 	if (this->status == ADMIN_STATUS_INACTIVE) return this->SendError(NETWORK_ERROR_NOT_EXPECTED);
 
-	uint32 d1 = p->Recv_uint32();
+	const uint32 d1 = p->Recv_uint32();
 
 	Debug(net, 6, "[admin] Ping from '{}' ({}): {}", this->admin_name, this->admin_version, d1);
 
@@ -639,10 +639,10 @@ NetworkRecvStatus ServerNetworkAdminSocketHandler::Receive_ADMIN_JOIN(Packet *p)
 {
 	if (this->status != ADMIN_STATUS_INACTIVE) return this->SendError(NETWORK_ERROR_NOT_EXPECTED);
 
-	std::string password = p->Recv_string(NETWORK_PASSWORD_LENGTH);
+	const std::string password = p->Recv_string(NETWORK_PASSWORD_LENGTH);
 
 	if (_settings_client.network.admin_password.empty() ||
-			_settings_client.network.admin_password.compare(password) != 0) {
+			_settings_client.network.admin_password != password) {
 		/* Password is invalid */
 		return this->SendError(NETWORK_ERROR_WRONG_PASSWORD);
 	}
@@ -762,7 +762,7 @@ NetworkRecvStatus ServerNetworkAdminSocketHandler::Receive_ADMIN_CHAT(Packet *p)
 	DestType desttype = (DestType)p->Recv_uint8();
 	int dest = p->Recv_uint32();
 
-	std::string msg = p->Recv_string(NETWORK_CHAT_LENGTH);
+	const std::string msg = p->Recv_string(NETWORK_CHAT_LENGTH);
 
 	switch (action) {
 		case NETWORK_ACTION_CHAT:
@@ -784,10 +784,10 @@ NetworkRecvStatus ServerNetworkAdminSocketHandler::Receive_ADMIN_EXTERNAL_CHAT(P
 {
 	if (this->status == ADMIN_STATUS_INACTIVE) return this->SendError(NETWORK_ERROR_NOT_EXPECTED);
 
-	std::string source = p->Recv_string(NETWORK_CHAT_LENGTH);
-	TextColour colour = (TextColour)p->Recv_uint16();
-	std::string user = p->Recv_string(NETWORK_CHAT_LENGTH);
-	std::string msg = p->Recv_string(NETWORK_CHAT_LENGTH);
+	const std::string source = p->Recv_string(NETWORK_CHAT_LENGTH);
+	const TextColour colour = (TextColour)p->Recv_uint16();
+	const std::string user = p->Recv_string(NETWORK_CHAT_LENGTH);
+	const std::string msg = p->Recv_string(NETWORK_CHAT_LENGTH);
 
 	if (!IsValidConsoleColour(colour)) {
 		Debug(net, 1, "[admin] Not supported chat colour {} ({}, {}, {}) from '{}' ({}).", (uint16)colour, source, user, msg, this->admin_name, this->admin_version);

@@ -92,7 +92,7 @@ void TCPConnecter::Kill()
  */
 void TCPConnecter::Connect(addrinfo *address)
 {
-	SOCKET sock = socket(address->ai_family, address->ai_socktype, address->ai_protocol);
+	const SOCKET sock = socket(address->ai_family, address->ai_socktype, address->ai_protocol);
 	if (sock == INVALID_SOCKET) {
 		Debug(net, 0, "Could not create {} {} socket: {}", NetworkAddress::SocketTypeAsString(address->ai_socktype), NetworkAddress::AddressFamilyAsString(address->ai_family), NetworkError::GetLast().AsString());
 		return;
@@ -120,7 +120,7 @@ void TCPConnecter::Connect(addrinfo *address)
 	NetworkAddress network_address = NetworkAddress(address->ai_addr, (int)address->ai_addrlen);
 	Debug(net, 5, "Attempting to connect to {}", network_address.GetAddressAsString());
 
-	int err = connect(sock, address->ai_addr, (int)address->ai_addrlen);
+	const int err = connect(sock, address->ai_addr, (int)address->ai_addrlen);
 	if (err != 0 && !NetworkError::GetLast().IsConnectInProgress()) {
 		closesocket(sock);
 
@@ -233,16 +233,16 @@ void TCPConnecter::Resolve()
 	hints.ai_flags = AI_ADDRCONFIG;
 	hints.ai_socktype = SOCK_STREAM;
 
-	std::string port_name = std::to_string(address.GetPort());
+	const auto port_name = std::to_string(address.GetPort());
 
 	static bool getaddrinfo_timeout_error_shown = false;
-	auto start = std::chrono::steady_clock::now();
+	const auto start = std::chrono::steady_clock::now();
 
 	addrinfo *ai;
-	int error = getaddrinfo(address.GetHostname().c_str(), port_name.c_str(), &hints, &ai);
+	const int error = getaddrinfo(address.GetHostname().c_str(), port_name.c_str(), &hints, &ai);
 
-	auto end = std::chrono::steady_clock::now();
-	auto duration = std::chrono::duration_cast<std::chrono::seconds>(end - start);
+	const auto end = std::chrono::steady_clock::now();
+	const auto duration = std::chrono::duration_cast<std::chrono::seconds>(end - start);
 	if (!getaddrinfo_timeout_error_shown && duration >= std::chrono::seconds(5)) {
 		Debug(net, 0, "getaddrinfo() for address \"{}\" took {} seconds", this->connection_string, duration.count());
 		Debug(net, 0, "  This is likely an issue in the DNS name resolver's configuration causing it to time out");
@@ -304,6 +304,7 @@ bool TCPConnecter::CheckActivity()
 			return true;
 
 		case Status::Connecting:
+			FALLTHROUGH;
 		case Status::Connected:
 			break;
 	}
@@ -324,10 +325,8 @@ bool TCPConnecter::CheckActivity()
 		FD_SET(socket, &write_fd);
 	}
 
-	timeval tv;
-	tv.tv_usec = 0;
-	tv.tv_sec = 0;
-	int n = select(FD_SETSIZE, nullptr, &write_fd, nullptr, &tv);
+	timeval tv{ 0,0 };
+	const int n = select(FD_SETSIZE, nullptr, &write_fd, nullptr, &tv);
 	/* select() failed; hopefully next try it doesn't. */
 	if (n < 0) {
 		/* select() normally never fails; so hopefully it works next try! */
